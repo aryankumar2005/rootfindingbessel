@@ -64,4 +64,4 @@ Guards are included to handle poles of h(x) where f(x) = 0.
 - Newton finds roots of g(x) at approximately ±2.41, ±5.11
 - Secant finds roots of h(x) at approximately ±2.41, ±5.11
 
-![Root Finding Plot](bessel_roots.png)
+![Root Finding Plot](besselroots.png)
