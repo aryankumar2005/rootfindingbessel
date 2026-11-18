@@ -1,67 +1,52 @@
-# MATLAB Root Finding: Bessel Function Eigenvalue Problem
+# Root-finding for a Bessel function equation (MATLAB)
 
-## Background
+Project 1 from my Numerical Methods and Programming module, improved after marker feedback.
 
-In solid mechanics, a special elastic wave exists if the following eigenvalue 
-relation has a real, non-trivial root (i.e. not x=0):
+In solid mechanics, a special type of elastic wave exists if this equation has a real root other than x = 0:
 
 h(x) = (J_6(x) + J_0(x)) / (J_4(x) - J_2(x)) = 0
 
-where J_n(x) is a Bessel function of the first kind of order n. This project 
-finds those roots using three classical root-finding algorithms implemented 
-from scratch in MATLAB.
+where J_n is a Bessel function of the first kind of order n. I wrote three root-finding methods to find the roots, each applied to a different part of the equation.
+
+## Methods
+
+**Bisection, on the denominator f(x) = J_4(x) - J_2(x).** If f changes sign between a and b, there must be a root in between. The method keeps halving the interval, keeping the half where the sign change is, until the interval is smaller than the tolerance. It always converges but is slow. The roots of f are where h(x) blows up, so they're not solutions of the equation, but they show where h is undefined.
+
+**Newton's method, on the numerator g(x) = J_6(x) + J_0(x).** Starting from a guess x0, it follows the tangent line to where it crosses zero:
+
+x1 = x0 - g(x0) / g'(x0)
+
+The derivative is worked out explicitly using the recurrence relation J_n'(x) = (J_{n-1}(x) - J_{n+1}(x)) / 2. Newton's method converges quickly near a root, but fails if the derivative is zero, which happens at x = 0. The function warns if a starting guess doesn't converge.
+
+**Secant method, on h(x) itself.** This works like Newton's method but estimates the derivative from the last two points, so it doesn't need g'(x):
+
+x2 = x1 - h(x1) (x1 - x0) / (h(x1) - h(x0))
+
+It skips starting points where h is undefined.
+
+Each method is run from starting points between -6 and 6, and repeated roots are removed.
 
 ## Files
 
-| File | Description |
-|---|---|
-| `f.m` | Denominator function: f(x) = J_4(x) - J_2(x) |
-| `g.m` | Numerator function: g(x) = J_6(x) + J_0(x) |
-| `g_prime.m` | Derivative of g(x), computed using the Bessel recurrence relation |
-| `h.m` | Full eigenvalue relation: h(x) = g(x) / f(x) |
-| `bisection_denominator.m` | Finds roots of f(x) using the Bisection method |
-| `newton_numerator.m` | Finds roots of g(x) using Newton's method |
-| `secant_wave.m` | Finds roots of h(x) using the Secant method |
-| `solve_wave.m` | Calls all three methods and plots results |
+- `f.m`, `g.m`, `h.m`: the denominator, numerator and full equation
+- `g_prime.m`: the derivative of g
+- `bisection_denominator.m`, `newton_numerator.m`, `secant_wave.m`: the three methods
+- `solve_wave.m`: runs all three and plots the roots
 
-## How to Run
+## How to run
 
-Place all `.m` files in the same directory, then run in MATLAB:
+Put all the files in the same folder and run in MATLAB:
 
 ```matlab
 solve_wave
 ```
 
-The plot appears automatically showing roots found by each method.
-
-## Methods
-
-### Bisection
-Searches for sign changes of f(x) across unit intervals from -6 to 5. 
-When a sign change is found, the interval is halved repeatedly until 
-the width is within tolerance. Guaranteed to converge.
-
-### Newton's Method
-Starting from initial guesses from -6 to 6, iteratively improves each 
-guess using:
-
-x1 = x0 - g(x0) / g'(x0)
-
-The derivative g'(x) is computed explicitly using the Bessel recurrence 
-relation: J_n'(x) = (J_{n-1}(x) - J_{n+1}(x)) / 2
-
-### Secant Method
-Similar to Newton but approximates the derivative using two points, 
-avoiding the need to compute h'(x) explicitly:
-
-x2 = x1 - h(x1) * (x1 - x0) / (h(x1) - h(x0))
-
-Guards are included to handle poles of h(x) where f(x) = 0.
-
 ## Results
 
-- Bisection finds roots of f(x) at approximately ±4.20
-- Newton finds roots of g(x) at approximately ±2.41, ±5.11
-- Secant finds roots of h(x) at approximately ±2.41, ±5.11
+The equation has real roots at about x = ±2.41 and ±5.11, so the special wave does exist. Newton's method and the secant method both find these. Bisection finds the points where h is undefined, at about ±4.20.
 
-![Root Finding Plot](besselroots.png)
+![Roots found by each method](besselroots.png)
+
+## References
+
+The methods follow the root-finding material in week 3 of the Numerical Methods and Programming module notes.
